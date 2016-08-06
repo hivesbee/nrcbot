@@ -1,1 +1,3 @@
-/nrcbot-config.json
+gulpfile.js
+server/dst/
+bookmarklet/postSlack_bookmarklet.min.js
