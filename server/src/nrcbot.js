@@ -4,8 +4,6 @@
 
 // babel
 import 'babel-polyfill';
-// Botkit
-import Botkit from 'botkit';
 // Twit
 import Twit from 'twit';
 // server
@@ -24,15 +22,7 @@ let accessLogger = log4js.getLogger('access');
 let errorLogger = log4js.getLogger('error');
 
 /** botkit settings. */
-let controller = Botkit.slackbot({ debug: false });
-let bot = controller.spawn({
-    token: process.env.SLACK_TOKEN
-});
-let provider = new NrcBotProvider(controller, bot, config);
-
-bot.startRTM(async (error, bot, payload) => {
-    await provider.say('nrcbot woke up.', 'test');
-});
+let provider = new NrcBotProvider(process.env.SLACK_TOKEN);
 
 /** Twit settings */
 let twit = new Twit({
@@ -83,36 +73,36 @@ app.post('/nrs/post/:username/:videoid', (req, res, next) => {
     res.end();
 });
 
+
+/* bot actions (Slack) */
+
+provider.hears('こんにちは', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
+    console.log(message);
+    provider.reply(message, 'おっすお願いしまーす');
+});
+
+provider.hears('.*ハゲ.*', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
+    console.log(message);
+    provider.reply(message, 'また髪の話してる…');
+});
+
+provider.hears('.*光(って|る|り).*', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
+    console.log(message);
+    provider.reply(message, 'また髪の話してる…');
+});
+
+provider.hears('やったぜ。', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
+    console.log(message);
+    provider.reply(message, 'http://blog.goo.ne.jp/kuso_oyazy/e/d97186e9d7a79e09040db494861d9f40');
+});
+
+provider.hears('.*キレ(そう|た).*', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
+    console.log(message);
+    provider.reply(message, 'まぁ落ち着けって。ワカメでも食べて元気だせよ');
+});
+
+
+/* launch server */
 let server = app.listen(8080, () => {
     console.log('nethive.info(express) is listening to port: ' + server.address().port);
 });
-
-
-
-/** sample */
-
-controller.hears('こんにちは', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
-    console.log(message);
-    bot.reply(message, 'おっすお願いしまーす');
-});
-
-controller.hears('.*ハゲ.*', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
-    console.log(message);
-    bot.reply(message, 'また髪の話してる…');
-});
-
-controller.hears('.*光(って|る|り).*', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
-    console.log(message);
-    bot.reply(message, 'また髪の話してる…');
-});
-
-controller.hears('やったぜ。', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
-    console.log(message);
-    bot.reply(message, 'http://blog.goo.ne.jp/kuso_oyazy/e/d97186e9d7a79e09040db494861d9f40');
-});
-
-controller.hears('.*キレ(そう|た).*', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
-    console.log(message);
-    bot.reply(message, 'まぁ落ち着けって。ワカメでも食べて元気だせよ');
-});
-
