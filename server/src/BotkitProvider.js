@@ -3,6 +3,7 @@ import 'babel-polyfill';
 import Botkit from 'botkit';
 import request from 'request';
 import prominence from 'prominence';
+import Enumerable from 'linq';
 
 export default class NrcBotProvider {
     constructor(tokens, roomName) {
@@ -22,9 +23,9 @@ export default class NrcBotProvider {
         let channelList = {};
         request(url, (err, res, body) => {
             let channels = JSON.parse(body).channels;
-            for(let channel of channels) {
-                channelList[channel.name] = channel.id;
-            }
+
+            channelList = Enumerable.from(channels).
+                toDictionary((e) => { return e.name; }, (e) => { return e.id; });
 
             console.log(channelList);
         });
@@ -46,7 +47,6 @@ export default class NrcBotProvider {
     async say(text) {
         let channel = this.channels[this.roomName];
         if (channel) {
-            console.log('call.');
             prominence(this.bot).say({
                 text: text,
                 channel: channel
