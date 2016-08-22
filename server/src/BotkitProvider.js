@@ -1,16 +1,14 @@
-// babel
 import 'babel-polyfill';
-// Botkit
+
 import Botkit from 'botkit';
-// server
 import request from 'request';
 import prominence from 'prominence';
 
 export default class NrcBotProvider {
-    constructor(slackToken) {
+    constructor(slackTokens) {
         this.token = process.env.SLACK_TOKEN;
         this.controller = Botkit.slackbot({ debug: false });
-        this.bot = this.controller.spawn({ token: slackToken });
+        this.bot = this.controller.spawn(slackTokens);
         this.channels = this._loadChannels();
 
         this.bot.startRTM(async (error, bot, payload) => {
@@ -35,6 +33,13 @@ export default class NrcBotProvider {
 
     hears(patterns, types, middlewareFn, callback) {
         this.controller.hears(patterns, types, middlewareFn, callback);
+    }
+
+    reacts(patterns, types, reply, callback) {
+        this.controller.hears(patterns, types, (bot, message) => {
+            console.log(message);
+            prominence(this.bot).reply(message, reply, callback);
+        });
     }
 
     async say(text, channelName) {

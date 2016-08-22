@@ -4,8 +4,6 @@
 
 // babel
 import 'babel-polyfill';
-// Twit
-import Twit from 'twit';
 // server
 import express from 'express';
 import request from 'request';
@@ -13,18 +11,29 @@ import log4js from 'log4js';
 import corser from 'corser';
 
 import config from './nrcbot-config.json';
-import NrcBotProvider from './NRCBotProvider.js';
+import BotkitProvider from './BotkitProvider.js';
+import TwitProvider from './TwitProvider.js';
 
 /** log settings. */
-log4js.configure('log-config.json');
+/*log4js.configure('log-config.json');
 let systemLogger = log4js.getLogger('system');
 let accessLogger = log4js.getLogger('access');
-let errorLogger = log4js.getLogger('error');
+let errorLogger = log4js.getLogger('error');*/
 
 /** botkit settings. */
-let provider = new NrcBotProvider(process.env.SLACK_TOKEN);
+let botkitProvider = new BotkitProvider({token: process.env.SLACK_TOKEN});
+//accessLogger.info('BotkitProvider initialized.');
 
 /** Twit settings */
+let twitProvider = new TwitProvider({
+    consumer_key: process.env.TWITTER_CONSUMER_KEY,
+    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+    access_token: process.env.TWITTER_ACCESS_TOKEN,
+    access_token_secret: process.env.TWITTER_ACCESS_SECRET
+});
+//accessLogger.info('TwitProvider initialized.');
+
+/*
 let twit = new Twit({
     consumer_key: process.env.TWITTER_CONSUMER_KEY,
     consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
@@ -35,8 +44,7 @@ let twit = new Twit({
 let follower;
 twit.get('friends/list', { screen_name: 'nrcbot_nethive' },  function (err, data, response) {
     follower = data.users;
-});
-accessLogger.info('Twit initialized.');
+});*/
 
 /** server settings */
 let app = express();
@@ -49,25 +57,33 @@ app.post('/nrs/post/:username/:videoid', (req, res, next) => {
     var videoid = req.params.videoid;
 	var message = username + 'が動画をおすすめしました\n' + config.const.niconicoUrlPattern + videoid;
 
-    accessLogger.info('called : /nrs/post/' + username + '/' + videoid);
+    //accessLogger.info('called : /nrs/post/' + username + '/' + videoid);
 
     // posts slack.
     try {
-        provider.say(message, 'test');
+        botkitProvider.say(message, 'test');
         res.writeHead(200, {'Content-Type': 'text/plain'});
-        systemLogger.info('slack post succeeded.');
+        //systemLogger.info('slack post succeeded.');
     } catch (e) {
         res.writeHead(500, {'Content-Type': 'text/plain'});
-        errLogger.error('slack error occured.');
-        
+        //errLogger.error('slack error occured.');
+        res.end();
     }
 
     // post twitter (mention).
-    for (var i = 0; i < follower.length; i++) {
+    /*for (var i = 0; i < follower.length; i++) {
         twit.post('statuses/update', {status: '@' + follower[i].screen_name + ' ' + message}, function(err, data, response) {
             //console.log('@' + follower[i].screen_name + ' ' + data);
             systemLogger.info('twitter post succeeded. : ' + follower[i].screen_name);
         });
+    }*/
+    try {
+        twitProvider.postToFollowers(message);
+        //systemLogger.info('twitter post succeeded.');
+    } catch (e) {
+        //errLogger.error('twitter error occured.');
+        //res.writeHead(500, {'Content-Type': 'text/plain'});
+        console.log('error @ twitProvider');
     }
 
     res.end();
@@ -75,31 +91,11 @@ app.post('/nrs/post/:username/:videoid', (req, res, next) => {
 
 
 /* bot actions (Slack) */
-
-provider.hears('こんにちは', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
-    console.log(message);
-    provider.reply(message, 'おっすお願いしまーす');
-});
-
-provider.hears('.*ハゲ.*', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
-    console.log(message);
-    provider.reply(message, 'また髪の話してる…');
-});
-
-provider.hears('.*光(って|る|り).*', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
-    console.log(message);
-    provider.reply(message, 'また髪の話してる…');
-});
-
-provider.hears('やったぜ。', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
-    console.log(message);
-    provider.reply(message, 'http://blog.goo.ne.jp/kuso_oyazy/e/d97186e9d7a79e09040db494861d9f40');
-});
-
-provider.hears('.*キレ(そう|た).*', ['mention', 'direct_mention', 'ambient'], function(bot, message) {
-    console.log(message);
-    provider.reply(message, 'まぁ落ち着けって。ワカメでも食べて元気だせよ');
-});
+botkitProvider.reacts('こんにちは', ['mention', 'direct_mention', 'ambient'], 'おっすお願いしまーす');
+botkitProvider.reacts('.*ハゲ.*', ['mention', 'direct_mention', 'ambient'], 'また髪の話してる…');
+botkitProvider.reacts('.*光(って|る|り).*', ['mention', 'direct_mention', 'ambient'], 'また髪の話してる…');
+botkitProvider.reacts('やったぜ。', ['mention', 'direct_mention', 'ambient'], 'http://blog.goo.ne.jp/kuso_oyazy/e/d97186e9d7a79e09040db494861d9f40');
+botkitProvider.reacts('.*キレ(そう|た).*', ['mention', 'direct_mention', 'ambient'], 'まぁ落ち着けって。ワカメでも食べて元気だせよ');
 
 
 /* launch server */
