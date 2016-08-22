@@ -18,6 +18,8 @@
             "filename": "logs/error.log",
             "pattern":  "-yyyy-MM-dd"
         },
-        { "type": "console" }
+        {
+            "type": "console"
+        }
     ]
 }
