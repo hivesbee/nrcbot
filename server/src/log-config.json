@@ -4,22 +4,38 @@
             "type":     "dateFile",
             "category": "system",
             "filename": "logs/system.log",
-            "pattern":  "-yyyy-MM-dd"
+            "pattern":  "-yyyy-MM-dd",
+            "layout": {
+                "type": "pattern",
+                "pattern": "[%r] [%[%5.5p%]] - %m%n"
+            }
         },
         {
             "type":     "dateFile",
             "category": "access",
             "filename": "logs/access.log",
-            "pattern":  "-yyyy-MM-dd"
+            "pattern":  "-yyyy-MM-dd",
+            "layout": {
+                "type": "pattern",
+                "pattern": "[%r] [%[%5.5p%]] - %m%n"
+            }
         },
         {
             "type":     "dateFile",
             "category": "error",
             "filename": "logs/error.log",
-            "pattern":  "-yyyy-MM-dd"
+            "pattern":  "-yyyy-MM-dd",
+            "layout": {
+                "type": "pattern",
+                "pattern": "[%r] [%[%5.5p%]] - %m%n"
+            }
         },
         {
-            "type": "console"
+            "type": "console",
+            "layout": {
+                "type": "pattern",
+                "pattern": "[%r] [%[%5.5p%]] - %m%n"
+            }
         }
     ]
 }
