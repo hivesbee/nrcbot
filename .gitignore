@@ -1,4 +1,4 @@
 node_modules/
 gulpfile.js
 server/dst/
-bookmarklet/postSlack_bookmarklet.min.js
+#bookmarklet/postSlack_bookmarklet.min.js
