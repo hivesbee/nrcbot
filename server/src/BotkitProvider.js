@@ -5,7 +5,9 @@ import request from 'request';
 import prominence from 'prominence';
 import Enumerable from 'linq';
 
-export default class NrcBotProvider {
+import Log from './LogManager.js';
+
+export default class BotkitProvider {
     constructor(tokens, roomName) {
         this.token = tokens.token;
         this.controller = Botkit.slackbot({ debug: false });
@@ -15,6 +17,7 @@ export default class NrcBotProvider {
 
         this.bot.startRTM(async (error, bot, payload) => {
             await this.say('nrcbot woke up.');
+            Log.System().info('[BotkitProvider] initialized.');
         });
     }
 
@@ -27,7 +30,7 @@ export default class NrcBotProvider {
             channelList = Enumerable.from(channels).
                 toDictionary((e) => { return e.name; }, (e) => { return e.id; });
 
-            console.log(channelList);
+            Log.System().info('[BotkitProvider._loadChannels] channels loaded.');
         });
 
         return channelList;
@@ -39,8 +42,8 @@ export default class NrcBotProvider {
 
     reacts(patterns, types, reply, callback) {
         this.controller.hears(patterns, types, (bot, message) => {
-            console.log(message);
             prominence(this.bot).reply(message, reply, callback);
+            Log.System().info('[BotkitProvider.reacts] reacted (text - ' + message.text + ', reply - ' + reply + ')');
         });
     }
 
@@ -51,11 +54,12 @@ export default class NrcBotProvider {
                 text: text,
                 channel: channel
             });
+            Log.System().info('[BotkitProvider.say] said (text - ' + text + ', channel - ' + channel + ')');
         }
     }
 
     reply(message, reply, callback) {
         this.bot.reply(message, reply, callback);
+        Log.System().info('[BotkitProvider.reply] replied (text - ' + message + ')');
     }
-
 }

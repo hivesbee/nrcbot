@@ -4,31 +4,43 @@ import Twit from 'twit';
 import prominence from 'prominence';
 import Enumerable from 'linq';
 
+import Log from './LogManager.js';
+
 export default class TwitProvider {
 
     constructor(twitterTokens) {
         this.twit = new Twit(twitterTokens);
         this.followers;
         this._loadFollowers();
+
+        Log.System().info('[TwitProvider] initialized.');
     }
 
     async _loadFollowers() {
         let self = this;
         prominence(this.twit).get('friends/list', { screen_name: 'nrcbot_nethive' })
-            .then((result) => { self.followers = result.users; });
+            .then((result) => {
+                self.followers = result.users;
+                Log.System().info('[TwitProvider._loadFollowers] followers loaded.');
+            });
     }
 
     postToFollowers(message) {
-        Enumerable.from(this.followers).forEach((e) => { this.postToFollower(e, message); }, this);
+        try {
+            Enumerable.from(this.followers).forEach((e) => { this.postToFollower(e, message); }, this);
+            Log.System().info('[TwitProvider.postToFollowers] tweets posted.');
+        } catch (e) {
+            Log.Error().error('[TwitProvider.postToFollowers] error occured.\n' + err.stack);
+        }
     }
 
     postToFollower(follower, message) {
         prominence(this.twit).post('statuses/update', {status: '@' + follower.screen_name + ' ' + message})
             .catch((err) => {
-                console.log('[postToFollower] error occured. : ' + err.stack);
+                Log.Error().error('[TwitProvider.postToFollower] error occured.\n' + err.stack);
             })
             .then((result) => {
-                console.log('succeeded : ' + follower.screen_name);
+                Log.System().info('[TwitProvider.postToFollower] tweet posted to ' + follower.screen_name);
         });
     }
 }

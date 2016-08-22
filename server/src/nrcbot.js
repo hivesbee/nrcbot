@@ -2,27 +2,22 @@
     niconico reccomend slack (nrs) bot
 */
 
-// babel
 import 'babel-polyfill';
-// server
+
 import express from 'express';
 import request from 'request';
 import log4js from 'log4js';
 import corser from 'corser';
 
 import config from './nrcbot-config.json';
+import Log from './LogManager.js';
 import BotkitProvider from './BotkitProvider.js';
 import TwitProvider from './TwitProvider.js';
 
-/** log settings. */
-/*log4js.configure('log-config.json');
-let systemLogger = log4js.getLogger('system');
-let accessLogger = log4js.getLogger('access');
-let errorLogger = log4js.getLogger('error');*/
 
 /** botkit settings. */
 let botkitProvider = new BotkitProvider({token: process.env.SLACK_TOKEN}, config.const.slackRoomName);
-//accessLogger.info('BotkitProvider initialized.');
+
 
 /** Twit settings */
 let twitProvider = new TwitProvider({
@@ -31,13 +26,13 @@ let twitProvider = new TwitProvider({
     access_token: process.env.TWITTER_ACCESS_TOKEN,
     access_token_secret: process.env.TWITTER_ACCESS_SECRET
 });
-//twitProvider.showFollowers();
-//accessLogger.info('TwitProvider initialized.');
+
 
 /** server settings */
 let app = express();
 app.use(corser.create()); // allows CORS
 
+// handles request from bookmarklet
 app.post('/nrs/post/:username/:videoid', (req, res, next) => {
 
     // gets params.
@@ -45,24 +40,24 @@ app.post('/nrs/post/:username/:videoid', (req, res, next) => {
     var videoid = req.params.videoid;
 	var message = username + 'が動画をおすすめしました\n' + config.const.niconicoUrlPattern + videoid;
 
-    //accessLogger.info('called : /nrs/post/' + username + '/' + videoid);
+    Log.Access().info('called - /nrs/post/' + username + '/' + videoid);
 
     // posts slack.
     try {
         botkitProvider.say(message);
-        //systemLogger.info('slack post succeeded.');
+        Log.System().info('slack post succeeded.');
     } catch (e) {
+        Log.Error().error('slack error occured.\n' + e.stack);
         res.writeHead(500, {'Content-Type': 'text/plain'});
-        //errLogger.error('slack error occured.');
         res.end();
     }
 
     // posts twitter (mention).
     try {
         twitProvider.postToFollowers(message);
-        //systemLogger.info('twitter post succeeded.');
+        Log.System().info('twitter post succeeded.');
     } catch (e) {
-        //errLogger.error('twitter error occured.');
+        Log.Error().error('twitter error occured.\n' + e.stack);
         res.writeHead(500, {'Content-Type': 'text/plain'});
         res.end();
     }
@@ -72,7 +67,7 @@ app.post('/nrs/post/:username/:videoid', (req, res, next) => {
 });
 
 
-/* bot actions (Slack) */
+/* bot actions (slack, sample) */
 botkitProvider.reacts('こんにちは', ['mention', 'direct_mention', 'ambient'], 'おっすお願いしまーす');
 botkitProvider.reacts('.*ハゲ.*', ['mention', 'direct_mention', 'ambient'], 'また髪の話してる…');
 botkitProvider.reacts('.*光(って|る|り).*', ['mention', 'direct_mention', 'ambient'], 'また髪の話してる…');
@@ -82,5 +77,5 @@ botkitProvider.reacts('.*キレ(そう|た).*', ['mention', 'direct_mention', 'a
 
 /* launch server */
 let server = app.listen(8080, () => {
-    console.log('nethive.info(express) is listening to port: ' + server.address().port);
+    Log.System().info('nethive.info(express) is listening to port: ' + server.address().port);
 });
