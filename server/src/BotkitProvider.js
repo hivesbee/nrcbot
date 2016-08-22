@@ -27,8 +27,8 @@ export default class BotkitProvider {
         request(url, (err, res, body) => {
             let channels = JSON.parse(body).channels;
 
-            channelList = Enumerable.from(channels).
-                toDictionary((e) => { return e.name; }, (e) => { return e.id; });
+            Enumerable.from(channels).
+                forEach((e) => { channelList[e.name] = e.id; }, this);
 
             Log.System().info('[BotkitProvider._loadChannels] channels loaded.');
         });
@@ -55,6 +55,8 @@ export default class BotkitProvider {
                 channel: channel
             });
             Log.System().info('[BotkitProvider.say] said (text - ' + text + ', channel - ' + channel + ')');
+        } else {
+            Log.Error().error('[BotkitProvider.say] channel is undefined.');
         }
     }
 
