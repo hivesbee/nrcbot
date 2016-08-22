@@ -1,5 +1,6 @@
 {
     "const": {
-        "niconicoUrlPattern": "http://www.nicovideo.jp/watch/"
+        "niconicoUrlPattern": "http://www.nicovideo.jp/watch/",
+        "slackRoomName": "test"
     }
 }
