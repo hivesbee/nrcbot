@@ -5,14 +5,15 @@ import request from 'request';
 import prominence from 'prominence';
 
 export default class NrcBotProvider {
-    constructor(slackTokens) {
-        this.token = process.env.SLACK_TOKEN;
+    constructor(tokens, roomName) {
+        this.token = tokens.token;
         this.controller = Botkit.slackbot({ debug: false });
-        this.bot = this.controller.spawn(slackTokens);
+        this.bot = this.controller.spawn(tokens);
         this.channels = this._loadChannels();
+        this.roomName = roomName;
 
         this.bot.startRTM(async (error, bot, payload) => {
-            await this.say('nrcbot woke up.', 'test');
+            await this.say('nrcbot woke up.');
         });
     }
 
@@ -42,8 +43,8 @@ export default class NrcBotProvider {
         });
     }
 
-    async say(text, channelName) {
-        let channel = this.channels[channelName];
+    async say(text) {
+        let channel = this.channels[this.roomName];
         if (channel) {
             console.log('call.');
             prominence(this.bot).say({

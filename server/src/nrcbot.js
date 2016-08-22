@@ -21,7 +21,7 @@ let accessLogger = log4js.getLogger('access');
 let errorLogger = log4js.getLogger('error');*/
 
 /** botkit settings. */
-let botkitProvider = new BotkitProvider({token: process.env.SLACK_TOKEN});
+let botkitProvider = new BotkitProvider({token: process.env.SLACK_TOKEN}, config.const.slackRoomName);
 //accessLogger.info('BotkitProvider initialized.');
 
 /** Twit settings */
@@ -49,8 +49,7 @@ app.post('/nrs/post/:username/:videoid', (req, res, next) => {
 
     // posts slack.
     try {
-        botkitProvider.say(message, 'test');
-        res.writeHead(200, {'Content-Type': 'text/plain'});
+        botkitProvider.say(message);
         //systemLogger.info('slack post succeeded.');
     } catch (e) {
         res.writeHead(500, {'Content-Type': 'text/plain'});
@@ -58,16 +57,17 @@ app.post('/nrs/post/:username/:videoid', (req, res, next) => {
         res.end();
     }
 
-    // post twitter (mention).
+    // posts twitter (mention).
     try {
         twitProvider.postToFollowers(message);
         //systemLogger.info('twitter post succeeded.');
     } catch (e) {
         //errLogger.error('twitter error occured.');
-        //res.writeHead(500, {'Content-Type': 'text/plain'});
-        console.log('error @ twitProvider');
+        res.writeHead(500, {'Content-Type': 'text/plain'});
+        res.end();
     }
 
+    res.writeHead(200, {'Content-Type': 'text/plain'});
     res.end();
 });
 
