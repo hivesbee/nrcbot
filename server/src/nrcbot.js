@@ -31,20 +31,8 @@ let twitProvider = new TwitProvider({
     access_token: process.env.TWITTER_ACCESS_TOKEN,
     access_token_secret: process.env.TWITTER_ACCESS_SECRET
 });
+//twitProvider.showFollowers();
 //accessLogger.info('TwitProvider initialized.');
-
-/*
-let twit = new Twit({
-    consumer_key: process.env.TWITTER_CONSUMER_KEY,
-    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-    access_token: process.env.TWITTER_ACCESS_TOKEN,
-    access_token_secret: process.env.TWITTER_ACCESS_SECRET
-});
-
-let follower;
-twit.get('friends/list', { screen_name: 'nrcbot_nethive' },  function (err, data, response) {
-    follower = data.users;
-});*/
 
 /** server settings */
 let app = express();
@@ -71,12 +59,6 @@ app.post('/nrs/post/:username/:videoid', (req, res, next) => {
     }
 
     // post twitter (mention).
-    /*for (var i = 0; i < follower.length; i++) {
-        twit.post('statuses/update', {status: '@' + follower[i].screen_name + ' ' + message}, function(err, data, response) {
-            //console.log('@' + follower[i].screen_name + ' ' + data);
-            systemLogger.info('twitter post succeeded. : ' + follower[i].screen_name);
-        });
-    }*/
     try {
         twitProvider.postToFollowers(message);
         //systemLogger.info('twitter post succeeded.');

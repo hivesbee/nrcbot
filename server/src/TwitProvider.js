@@ -4,29 +4,30 @@ import Twit from 'twit';
 import prominence from 'prominence';
 
 export default class TwitProvider {
+
     constructor(twitterTokens) {
         this.twit = new Twit(twitterTokens);
-        this.follower = this._loadFollowers();
+        this.follower;
+        this._loadFollowers();
     }
 
     async _loadFollowers() {
-        return prominence(this.twit).get('friends/list', { screen_name: 'nrcbot_nethive' })
-            .then((result) => {
-                console.log('then');
-                console.log(result.users);
-
-                return result.users;
-            });
+        let self = this;
+        prominence(this.twit).get('friends/list', { screen_name: 'nrcbot_nethive' })
+            .then((result) => { self.follower = result.users; });
     }
 
     postToFollowers(message) {
-        console.log('a');
+        let self = this;
         for (var i = 0; i < this.follower.length; i++) {
-            console.log('i = ' + i);
-            prominence(this.twit).post('statuses/update', {status: '@' + this.follower[i].screen_name + ' ' + message}, function(err, data, response) {
-                console.log('twitter post succeeded. : ' + this.follower[i].screen_name);
-                //systemLogger.info('twitter post succeeded. : ' + this.follower[i].screen_name);
-            });
+            this.postToFollower(this.follower[i], message);
         }
+    }
+
+    postToFollower(follower, message) {
+        prominence(this.twit).post('statuses/update', {status: '@' + follower.screen_name + ' ' + message})
+            .then((result) => {
+                console.log('succeeded : ' + follower.screen_name);
+        });
     }
 }
