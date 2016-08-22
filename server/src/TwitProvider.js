@@ -7,12 +7,6 @@ export default class TwitProvider {
     constructor(twitterTokens) {
         this.twit = new Twit(twitterTokens);
         this.follower = this._loadFollowers();
-        /*this.follower = prominence(this.twit).get('friends/list', { screen_name: 'nrcbot_nethive' },  function (err, data, response) {
-            return data.users;
-        });*/
-        
-        console.log('followers:');
-        console.log();
     }
 
     async _loadFollowers() {
@@ -34,9 +28,5 @@ export default class TwitProvider {
                 //systemLogger.info('twitter post succeeded. : ' + this.follower[i].screen_name);
             });
         }
-    }
-
-    showFollowers() {
-        console.log(this.follower);
     }
 }
