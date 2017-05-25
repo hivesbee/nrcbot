@@ -12,7 +12,7 @@ import corser from 'corser';
 import config from './nrcbot-config.json';
 import Log from './LogManager.js';
 import BotkitProvider from './BotkitProvider.js';
-import TwitProvider from './TwitProvider.js';
+// import TwitProvider from './TwitProvider.js';
 
 
 /** botkit settings. */
@@ -20,12 +20,12 @@ let botkitProvider = new BotkitProvider({token: process.env.SLACK_TOKEN}, config
 
 
 /** Twit settings */
-let twitProvider = new TwitProvider({
+/*let twitProvider = new TwitProvider({
     consumer_key: process.env.TWITTER_CONSUMER_KEY,
     consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
     access_token: process.env.TWITTER_ACCESS_TOKEN,
     access_token_secret: process.env.TWITTER_ACCESS_SECRET
-});
+});*/
 
 
 /** server settings */
@@ -53,14 +53,14 @@ app.post('/nrs/post/:username/:videoid', (req, res, next) => {
     }
 
     // posts twitter (mention).
-    try {
+    /*try {
         twitProvider.postToFollowers(message);
         Log.System().info('twitter post succeeded.');
     } catch (e) {
         Log.Error().error('twitter error occured.\n' + e.stack);
         res.writeHead(500, {'Content-Type': 'text/plain'});
         res.end();
-    }
+    }*/
 
     res.writeHead(200, {'Content-Type': 'text/plain'});
     res.end();
